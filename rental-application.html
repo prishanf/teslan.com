@@ -90,6 +90,7 @@ input[type="text"],
 input[type="email"],
 input[type="tel"],
 input[type="date"],
+input[type="month"],
 input[type="number"],
 select,
 textarea {
@@ -320,8 +321,8 @@ button {
         </div>
         <div class="form-row">
             <div>
-                <label>Desired Move-In Date:(YYYY-MM)</label>
-                <input type="text" id="move_in_date" />
+                <label>Desired Move-In Date:</label>
+                <input type="month" id="move_in_date" />
             </div>
             <div>
                 <label>Lease Term Requested: (1,2,3 Years)</label>
@@ -338,8 +339,8 @@ button {
         </div>
         <div class="form-row">
             <div>
-                <label>Date of Birth:(YYYY-MM-DD)</label>
-                <input type="text" id="birthdate" />
+                <label>Date of Birth:</label>
+                <input type="date" id="birthdate" />
             </div>
             <div>
                 <label>Marital Status:</label>
@@ -414,12 +415,12 @@ button {
                 <input type="text" id="current_rent" />
             </div>
             <div>
-                <label>Move-In Date:(YYYY-MM-DD)</label>
-                <input type="text" id="current_start" />
+                <label>Move-In Date:</label>
+                <input type="date" id="current_start" />
             </div>
             <div>
-                <label>Move-Out Date:(YYYY-MM-DD)</label>
-                <input type="text" id="current_end" />
+                <label>Move-Out Date:</label>
+                <input type="date" id="current_end" />
             </div>
         </div>
 
@@ -466,12 +467,12 @@ button {
                 <input type="text" id="prev_rent_1" />
             </div>
             <div>
-                <label>From Date:(YYYY-MM-DD)</label>
-                <input type="text" id="prev_start_1" />
+                <label>From Date:</label>
+                <input type="date" id="prev_start_1" />
             </div>
             <div>
-                <label>To Date:(YYYY-MM-DD)</label>
-                <input type="text" id="prev_end_1" />
+                <label>To Date:</label>
+                <input type="date" id="prev_end_1" />
             </div>
         </div>
 
@@ -513,12 +514,12 @@ button {
                 <input type="text" id="prev_rent_2" />
             </div>
             <div>
-                <label>From Date:(YYYY-MM-DD)</label>
-                <input type="text" id="prev_start_2" />
+                <label>From Date:</label>
+                <input type="date" id="prev_start_2" />
             </div>
             <div>
-                <label>To Date:(YYYY-MM-DD)</label>
-                <input type="text" id="prev_end_2" />
+                <label>To Date:</label>
+                <input type="date" id="prev_end_2" />
             </div>
         </div>
 
@@ -553,8 +554,8 @@ button {
 
         <div class="form-row">
             <div>
-                <label>Employment Start Date(YYYY-MM)</label>
-                <input type="text" id="employment_start" />
+                <label>Employment Start Date:</label>
+                <input type="month" id="employment_start" />
             </div>
             <div>
                 <label>Gross Monthly Income:</label>
@@ -587,12 +588,12 @@ button {
                 <input type="tel" id="prev_employer_phone" />
             </div>
             <div>
-                <label>From Date:(YYYY-MM)</label>
-                <input type="text" id="prev_employment_start" />
+                <label>From Date:</label>
+                <input type="month" id="prev_employment_start" />
             </div>
             <div>
-                <label>To Date:(YYYY-MM)</label>
-                <input type="text" id="prev_employment_end" />
+                <label>To Date:</label>
+                <input type="month" id="prev_employment_end" />
             </div>
         </div>
 
@@ -967,7 +968,7 @@ button {
             <div class="signature-row">
                 <div class="signature-field">
                     <label>Date:</label>
-                    <input type="text" id="primary_signature_date" />
+                    <input type="date" id="primary_signature_date" />
                 </div>
             </div>
 
@@ -992,7 +993,7 @@ button {
             <div class="signature-row">
                 <div class="signature-field">
                     <label>Date:</label>
-                    <input type="text" id="co_signature_date" />
+                    <input type="date" id="co_signature_date" />
                 </div>
             </div>
         </div>
@@ -1000,10 +1001,14 @@ button {
         <div class="button-container">
             <button type="submit" class="btn-download">Generate & Download PDF</button>
             <button type="button" class="btn-clear" onclick="clearForm()">Clear Form</button>
+            <button type="button" class="btn-blank" onclick="loadSampleData()" style="background: #9b59b6;">Load Sample Data</button>
         </div>
 
 </form>
 </div>
+
+<!-- Sample Data for Testing - Comment out to disable -->
+<script src="sample-data.js"></script>
 
 <script>
 const { jsPDF } = window.jspdf;
@@ -1013,6 +1018,28 @@ const primaryCanvas = document.getElementById("primarySignaturePad");
 const coCanvas = document.getElementById("coSignaturePad");
 const primarySigPad = new SignaturePad(primaryCanvas);
 const coSigPad = new SignaturePad(coCanvas);
+
+// Auto-populate signature dates with today's date
+function setTodayDate() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    const primaryDateField = document.getElementById("primary_signature_date");
+    const coDateField = document.getElementById("co_signature_date");
+    
+    if (primaryDateField) {
+        primaryDateField.value = todayStr;
+    }
+    if (coDateField) {
+        coDateField.value = todayStr;
+    }
+}
+
+// Set today's date when page loads
+setTodayDate();
 
 // Helper function to get element value safely
 function getValue(id) {
@@ -1030,6 +1057,14 @@ function getRadioValue(name) {
 function formatDate(dateStr) {
     if (!dateStr) return '';
     try {
+        // Handle month input format (YYYY-MM)
+        if (dateStr.match(/^\d{4}-\d{2}$/)) {
+            const [year, month] = dateStr.split('-');
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            return `${monthNames[parseInt(month) - 1]} ${year}`;
+        }
+        // Handle full date format (YYYY-MM-DD)
         const date = new Date(dateStr);
         return date.toLocaleDateString('en-CA');
     } catch {
@@ -1043,6 +1078,8 @@ function clearForm() {
         document.getElementById('appForm').reset();
         primarySigPad.clear();
         coSigPad.clear();
+        // Reset signature dates to today
+        setTodayDate();
     }
 }
 
@@ -1071,82 +1108,150 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    let yPos = 20;
-    const margin = 14;
-    const lineHeight = 7;
+    let yPos = 15;
+    const margin = 12;
+    const topMargin = 15;
+    const bottomMargin = 25;
+    let pageNum = 1;
+
+    // Helper function to add page number
+    function addPageNumber() {
+        const totalPages = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(128, 128, 128);
+            doc.text(
+                `Page ${i} of ${totalPages}`,
+                pageWidth / 2,
+                pageHeight - 10,
+                { align: 'center' }
+            );
+            doc.setTextColor(0, 0, 0);
+        }
+    }
 
     // Helper function to add new page if needed
     function checkPageBreak(requiredSpace = 20) {
-        if (yPos + requiredSpace > pageHeight - 20) {
+        if (yPos + requiredSpace > pageHeight - bottomMargin) {
             doc.addPage();
-            yPos = 20;
+            pageNum++;
+            yPos = topMargin;
             return true;
         }
         return false;
     }
 
-    // Helper function to add section header
+    // Helper function to add section header with professional styling
     function addSectionHeader(title) {
-        checkPageBreak(15);
-        yPos += 5;
-        doc.setFontSize(14);
+        checkPageBreak(12);
+        yPos += 3;
+        doc.setFontSize(12);
         doc.setFont(undefined, 'bold');
-        doc.setFillColor(221, 221, 221);
-        doc.rect(margin, yPos - 5, pageWidth - 2 * margin, 8, 'F');
+        // Professional header with subtle background
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, yPos - 3, pageWidth - 2 * margin, 7, 'F');
+        // Border line
+        doc.setDrawColor(100, 100, 100);
+        doc.setLineWidth(0.5);
+        doc.line(margin, yPos - 3, pageWidth - margin, yPos - 3);
+        doc.line(margin, yPos + 4, pageWidth - margin, yPos + 4);
         doc.setTextColor(44, 62, 80);
-        doc.text(title, margin + 2, yPos + 2);
-        yPos += 12;
-        doc.setFontSize(10);
+        doc.text(title, margin + 3, yPos + 2);
+        yPos += 10;
+        doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
         doc.setTextColor(0, 0, 0);
     }
 
-    // Helper function to add table
-    function addTable(data, startY) {
+    // Helper function to add compact table with professional styling
+    function addTable(data, startY, options = {}) {
+        // Filter out empty rows and clean up data
+        const filteredData = data
+            .map(row => [row[0], row[1] || ''])
+            .filter(row => row[1] || options.showEmpty);
+        if (filteredData.length === 0 && !options.showEmpty) return startY;
+        
         doc.autoTable({
             startY: startY,
-            body: data,
+            body: filteredData,
             styles: { 
-                fontSize: 9,
-                cellPadding: 3,
+                fontSize: 8.5,
+                cellPadding: { top: 2.5, bottom: 2.5, left: 3, right: 3 },
                 overflow: 'linebreak',
-                cellWidth: 'wrap'
+                cellWidth: 'wrap',
+                lineColor: [200, 200, 200],
+                lineWidth: 0.3,
+                textColor: [0, 0, 0],
+                minCellHeight: 6
+            },
+            headStyles: {
+                fillColor: [245, 245, 245],
+                textColor: [44, 62, 80],
+                fontStyle: 'bold',
+                fontSize: 8.5
+            },
+            alternateRowStyles: {
+                fillColor: [252, 252, 252]
             },
             columnStyles: { 
-                0: { fontStyle: 'bold', cellWidth: 70 },
-                1: { cellWidth: 'auto' }
+                0: { 
+                    fontStyle: 'bold', 
+                    cellWidth: options.labelWidth || 75,
+                    textColor: [60, 60, 60]
+                },
+                1: { 
+                    cellWidth: 'auto',
+                    textColor: [30, 30, 30]
+                }
             },
-            margin: { left: margin, right: margin },
-            theme: 'grid'
+            margin: { left: margin, right: margin, top: 2 },
+            theme: 'striped',
+            showHead: false
         });
-        return doc.lastAutoTable.finalY + 5;
+        return doc.lastAutoTable.finalY + 3;
     }
 
-    // Page 1: Title and Property Information
-    doc.setFontSize(16);
+    // Helper function to add subsection header
+    function addSubsectionHeader(title) {
+        checkPageBreak(10);
+        yPos += 2;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(60, 60, 60);
+        doc.text(title, margin, yPos);
+        yPos += 6;
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+    }
+
+    // Page 1: Professional Header and Property Information
+    doc.setFontSize(18);
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(44, 62, 80);
     doc.text("RESIDENTIAL RENTAL APPLICATION", pageWidth / 2, yPos, { align: "center" });
-    yPos += 8;
-    doc.setFontSize(10);
+    yPos += 7;
+    doc.setFontSize(9);
     doc.setFont(undefined, 'normal');
+    doc.setTextColor(100, 100, 100);
     doc.text("Please complete all sections accurately and legibly", pageWidth / 2, yPos, { align: "center" });
-    yPos += 10;
+    yPos += 12;
 
     addSectionHeader("PROPERTY INFORMATION");
     const propertyData = [
         ["Property Address", getValue('property_address')],
-        ["Desired Move-In Date", getValue('move_in_date')],
-        ["Lease Term Requested", getValue('lease_term')]
+        ["Desired Move-In Date", formatDate(getValue('move_in_date'))],
+        ["Lease Term Requested", getValue('lease_term') ? getValue('lease_term') + ' year(s)' : '']
     ];
     yPos = addTable(propertyData, yPos);
 
-    // Page 2: Primary Applicant Information
-    doc.addPage();
-    yPos = 20;
+    // Primary Applicant Information on same page if space allows
+    checkPageBreak(25);
     addSectionHeader("PERSONAL INFORMATION - PRIMARY APPLICANT");
     const primaryData = [
         ["Full Legal Name", getValue('full_name')],
-        ["Date of Birth", getValue('birthdate')],
+        ["Date of Birth", formatDate(getValue('birthdate'))],
         ["Marital Status", getValue('marital_status')],
         ["Primary Phone", getValue('phone')],
         ["Alternate Phone", getValue('cell')],
@@ -1156,138 +1261,102 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
     ];
     yPos = addTable(primaryData, yPos);
 
-    // Page 3: Current Residence
-    doc.addPage();
-    yPos = 20;
-    addSectionHeader("CURRENT RESIDENCE");
+    // Residence History - combine on same page when possible
+    checkPageBreak(35);
+    addSectionHeader("RESIDENCE HISTORY");
+    
+    addSubsectionHeader("Current Residence");
     const currentResidenceData = [
-        ["Current Address", getValue('current_address')],
-        ["City", getValue('current_city')],
-        ["Province", getValue('current_province')],
-        ["Postal Code", getValue('current_postal')],
-        ["Landlord/Property Manager Name", getValue('current_landlord')],
+        ["Address", getValue('current_address')],
+        ["City, Province, Postal", [getValue('current_city'), getValue('current_province'), getValue('current_postal')].filter(x => x).join(', ')],
+        ["Landlord/Property Manager", getValue('current_landlord')],
         ["Landlord Phone", getValue('current_landlord_phone')],
-        ["Monthly Rent", getValue('current_rent')],
-        ["Move-In Date", getValue('current_start')],
-        ["Move-Out Date", getValue('current_end')],
+        ["Monthly Rent", getValue('current_rent') ? '$' + getValue('current_rent') : ''],
+        ["Move-In Date", formatDate(getValue('current_start'))],
+        ["Move-Out Date", formatDate(getValue('current_end'))],
         ["Reason for Leaving", getValue('reason_leaving')]
     ];
     yPos = addTable(currentResidenceData, yPos);
 
     // Previous Address #1
-    checkPageBreak(30);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Previous Address #1", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    checkPageBreak(25);
+    addSubsectionHeader("Previous Address #1");
     const prev1Data = [
         ["Address", getValue('prev_address_1')],
-        ["City", getValue('prev_city_1')],
-        ["Province", getValue('prev_province_1')],
-        ["Postal Code", getValue('prev_postal_1')],
+        ["City, Province, Postal", [getValue('prev_city_1'), getValue('prev_province_1'), getValue('prev_postal_1')].filter(x => x).join(', ')],
         ["Landlord Name", getValue('prev_landlord_1')],
         ["Landlord Phone", getValue('prev_landlord_phone_1')],
-        ["Monthly Rent", getValue('prev_rent_1')],
-        ["From Date", getValue('prev_start_1')],
-        ["To Date", getValue('prev_end_1')]
+        ["Monthly Rent", getValue('prev_rent_1') ? '$' + getValue('prev_rent_1') : ''],
+        ["From Date", formatDate(getValue('prev_start_1'))],
+        ["To Date", formatDate(getValue('prev_end_1'))]
     ];
     yPos = addTable(prev1Data, yPos);
 
     // Previous Address #2
-    checkPageBreak(30);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Previous Address #2", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    checkPageBreak(25);
+    addSubsectionHeader("Previous Address #2");
     const prev2Data = [
         ["Address", getValue('prev_address_2')],
-        ["City", getValue('prev_city_2')],
-        ["Province", getValue('prev_province_2')],
-        ["Postal Code", getValue('prev_postal_2')],
+        ["City, Province, Postal", [getValue('prev_city_2'), getValue('prev_province_2'), getValue('prev_postal_2')].filter(x => x).join(', ')],
         ["Landlord Name", getValue('prev_landlord_2')],
         ["Landlord Phone", getValue('prev_landlord_phone_2')],
-        ["Monthly Rent", getValue('prev_rent_2')],
-        ["From Date", getValue('prev_start_2')],
-        ["To Date", getValue('prev_end_2')]
+        ["Monthly Rent", getValue('prev_rent_2') ? '$' + getValue('prev_rent_2') : ''],
+        ["From Date", formatDate(getValue('prev_start_2'))],
+        ["To Date", formatDate(getValue('prev_end_2'))]
     ];
     yPos = addTable(prev2Data, yPos);
 
-    // Page 4: Employment & Income
-    doc.addPage();
-    yPos = 20;
+    // Employment & Income
+    checkPageBreak(35);
     addSectionHeader("EMPLOYMENT & INCOME");
     
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Current Employment", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    addSubsectionHeader("Current Employment");
     const currentEmploymentData = [
         ["Employer Name", getValue('employer')],
         ["Occupation/Position", getValue('occupation')],
         ["Employer Address", getValue('employer_address')],
         ["Supervisor Name", getValue('supervisor')],
         ["Employer Phone", getValue('employer_phone')],
-        ["Employment Start Date", getValue('employment_start')],
-        ["Gross Monthly Income", getValue('monthly_income')],
+        ["Employment Start Date", formatDate(getValue('employment_start'))],
+        ["Gross Monthly Income", getValue('monthly_income') ? '$' + getValue('monthly_income') : ''],
         ["Employment Type", getValue('employment_type')]
     ];
     yPos = addTable(currentEmploymentData, yPos);
 
-    checkPageBreak(25);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Previous Employment", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    checkPageBreak(20);
+    addSubsectionHeader("Previous Employment");
     const prevEmploymentData = [
         ["Employer Name", getValue('prev_employer')],
         ["Occupation/Position", getValue('prev_occupation')],
         ["Employer Phone", getValue('prev_employer_phone')],
-        ["From Date", getValue('prev_employment_start')],
-        ["To Date", getValue('prev_employment_end')]
+        ["From Date", formatDate(getValue('prev_employment_start'))],
+        ["To Date", formatDate(getValue('prev_employment_end'))]
     ];
     yPos = addTable(prevEmploymentData, yPos);
 
     checkPageBreak(15);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Additional Income Sources", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    addSubsectionHeader("Additional Income Sources");
     const otherIncomeData = [
         ["Other Income Source", getValue('other_income_source')],
-        ["Monthly Amount", getValue('other_income_amount')]
+        ["Monthly Amount", getValue('other_income_amount') ? '$' + getValue('other_income_amount') : '']
     ];
     yPos = addTable(otherIncomeData, yPos);
 
-    // Page 5: Vehicle, Occupants, Pets
-    doc.addPage();
-    yPos = 20;
+    // Vehicle, Occupants, Pets - combine on same page
+    checkPageBreak(30);
     addSectionHeader("VEHICLE INFORMATION");
     const vehicleOwned = getRadioValue('vehicle_owned');
     const vehicleData = [
-        ["Do you own a vehicle?", vehicleOwned || ''],
+        ["Do you own a vehicle?", vehicleOwned ? vehicleOwned.charAt(0).toUpperCase() + vehicleOwned.slice(1) : ''],
         ["Vehicle Make/Model", getValue('vehicle_make')],
         ["Year", getValue('vehicle_year')],
         ["License Plate", getValue('vehicle_plate')]
     ];
     yPos = addTable(vehicleData, yPos);
 
+    checkPageBreak(30);
     addSectionHeader("ADDITIONAL OCCUPANTS");
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Spouse/Co-Applicant", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    addSubsectionHeader("Spouse/Co-Applicant");
     const spouseData = [
         ["Full Name", getValue('spouse_name')],
         ["Date of Birth", formatDate(getValue('spouse_dob'))],
@@ -1296,17 +1365,12 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
         ["Employer", getValue('spouse_employer')],
         ["Occupation", getValue('spouse_occupation')],
         ["Employer Phone", getValue('spouse_employer_phone')],
-        ["Gross Monthly Income", getValue('spouse_income')]
+        ["Gross Monthly Income", getValue('spouse_income') ? '$' + getValue('spouse_income') : '']
     ];
     yPos = addTable(spouseData, yPos);
 
     checkPageBreak(20);
-    doc.setFontSize(11);
-    doc.setFont(undefined, 'bold');
-    doc.text("Other Occupants", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
+    addSubsectionHeader("Other Occupants");
     const occupantsData = [
         ["Number of Adults (18+)", getValue('num_adults')],
         ["Number of Children (Under 18)", getValue('num_children')]
@@ -1320,27 +1384,26 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
         if (name) {
             occupants.push([
                 `Occupant ${i}`,
-                `Name: ${name}, Relationship: ${getValue(`occupant${i}_relationship`)}, Age: ${getValue(`occupant${i}_age`)}`
+                `${name} (${getValue(`occupant${i}_relationship`)}, Age: ${getValue(`occupant${i}_age`)})`
             ]);
         }
     }
     if (occupants.length > 0) {
-        checkPageBreak(occupants.length * 8);
+        checkPageBreak(occupants.length * 6);
         yPos = addTable(occupants, yPos);
     }
 
     checkPageBreak(20);
     addSectionHeader("PETS & SMOKING");
     const petsSmokingData = [
-        ["Do you have pets?", getRadioValue('pets') || ''],
+        ["Do you have pets?", getRadioValue('pets') ? getRadioValue('pets').charAt(0).toUpperCase() + getRadioValue('pets').slice(1) : ''],
         ["Pet Details", getValue('pet_details')],
-        ["Do you or any occupants smoke?", getRadioValue('smokers') || '']
+        ["Do you or any occupants smoke?", getRadioValue('smokers') ? getRadioValue('smokers').charAt(0).toUpperCase() + getRadioValue('smokers').slice(1) : '']
     ];
     yPos = addTable(petsSmokingData, yPos);
 
-    // Page 6: Emergency Contact, References
-    doc.addPage();
-    yPos = 20;
+    // Emergency Contact & References
+    checkPageBreak(25);
     addSectionHeader("EMERGENCY CONTACT");
     const emergencyData = [
         ["Name", getValue('emergency_name')],
@@ -1350,15 +1413,11 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
     ];
     yPos = addTable(emergencyData, yPos);
 
+    checkPageBreak(30);
     addSectionHeader("REFERENCES");
     for (let i = 1; i <= 3; i++) {
-        checkPageBreak(25);
-        doc.setFontSize(11);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Reference ${i}`, margin, yPos);
-        yPos += 7;
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
+        checkPageBreak(20);
+        addSubsectionHeader(`Reference ${i}`);
         const refData = [
             ["Name", getValue(`ref${i}_name`)],
             ["Relationship", getValue(`ref${i}_relationship`)],
@@ -1368,39 +1427,46 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
         yPos = addTable(refData, yPos);
     }
 
-    // Page 7: Additional Questions
-    doc.addPage();
-    yPos = 20;
+    // Additional Questions
+    checkPageBreak(30);
     addSectionHeader("ADDITIONAL QUESTIONS");
     const additionalQuestionsData = [
-        ["Ever been evicted?", getRadioValue('evicted') || ''],
+        ["Ever been evicted?", getRadioValue('evicted') ? getRadioValue('evicted').charAt(0).toUpperCase() + getRadioValue('evicted').slice(1) : ''],
         ["Eviction Explanation", getValue('evicted_explanation')],
-        ["Ever broken a lease?", getRadioValue('broken_lease') || ''],
+        ["Ever broken a lease?", getRadioValue('broken_lease') ? getRadioValue('broken_lease').charAt(0).toUpperCase() + getRadioValue('broken_lease').slice(1) : ''],
         ["Broken Lease Explanation", getValue('broken_lease_explanation')],
-        ["Ever filed for bankruptcy?", getRadioValue('bankruptcy') || ''],
+        ["Ever filed for bankruptcy?", getRadioValue('bankruptcy') ? getRadioValue('bankruptcy').charAt(0).toUpperCase() + getRadioValue('bankruptcy').slice(1) : ''],
         ["Bankruptcy Details", getValue('bankruptcy_details')],
-        ["Ever convicted of criminal offense?", getRadioValue('criminal') || ''],
+        ["Ever convicted of criminal offense?", getRadioValue('criminal') ? getRadioValue('criminal').charAt(0).toUpperCase() + getRadioValue('criminal').slice(1) : ''],
         ["Criminal Explanation", getValue('criminal_explanation')],
-        ["Renters Insurance", getRadioValue('insurance') || '']
+        ["Renters Insurance", getRadioValue('insurance') ? getRadioValue('insurance').replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : '']
     ];
     yPos = addTable(additionalQuestionsData, yPos);
 
-    checkPageBreak(15);
+    checkPageBreak(20);
     addSectionHeader("ADDITIONAL INFORMATION");
     const additionalInfo = getValue('additional_info');
     if (additionalInfo) {
-        doc.setFontSize(9);
+        doc.setFontSize(8.5);
+        doc.setTextColor(30, 30, 30);
         const splitText = doc.splitTextToSize(additionalInfo, pageWidth - 2 * margin);
         doc.text(splitText, margin, yPos);
-        yPos += splitText.length * 5;
+        yPos += splitText.length * 4.5;
+        doc.setTextColor(0, 0, 0);
+    } else {
+        doc.setFontSize(8.5);
+        doc.setTextColor(150, 150, 150);
+        doc.text("No additional information provided.", margin, yPos);
+        yPos += 6;
+        doc.setTextColor(0, 0, 0);
     }
 
-    // Page 8: Declarations and Signatures
-    doc.addPage();
-    yPos = 20;
+    // Declarations and Signatures
+    checkPageBreak(40);
     addSectionHeader("DECLARATIONS AND AUTHORIZATION");
     
     doc.setFontSize(8);
+    doc.setTextColor(40, 40, 40);
     const declarations = [
         "I/We declare and certify that:",
         "• All information provided in this application is true, accurate, and complete.",
@@ -1412,77 +1478,110 @@ document.getElementById("appForm").addEventListener("submit", function(e) {
         "• Any application fee paid is non-refundable."
     ];
     
-    declarations.forEach(declaration => {
-        checkPageBreak(6);
+    declarations.forEach((declaration, index) => {
+        checkPageBreak(5);
+        if (index === 0) {
+            doc.setFont(undefined, 'bold');
+            doc.setFontSize(8.5);
+        } else {
+            doc.setFont(undefined, 'normal');
+            doc.setFontSize(8);
+        }
         const splitText = doc.splitTextToSize(declaration, pageWidth - 2 * margin);
         doc.text(splitText, margin, yPos);
-        yPos += splitText.length * 5;
+        yPos += splitText.length * 4.2;
     });
+    doc.setTextColor(0, 0, 0);
 
     // Primary Applicant Signature
-    checkPageBreak(50);
-    doc.setFontSize(11);
+    checkPageBreak(45);
+    yPos += 5;
+    doc.setDrawColor(200, 200, 200);
+    doc.setLineWidth(0.3);
+    doc.line(margin, yPos, pageWidth - margin, yPos);
+    yPos += 8;
+    
+    doc.setFontSize(10);
     doc.setFont(undefined, 'bold');
+    doc.setTextColor(44, 62, 80);
     doc.text("Primary Applicant", margin, yPos);
-    yPos += 7;
-    doc.setFontSize(9);
-    doc.setFont(undefined, 'normal');
-    doc.text(`Full Name: ${getValue('primary_signature_name')}`, margin, yPos);
     yPos += 6;
+    doc.setFontSize(8.5);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    doc.text(`Full Name: ${getValue('primary_signature_name')}`, margin, yPos);
+    yPos += 8;
     
     // Add signature image or typed signature
     const primarySigName = getValue('primary_typed_signature');
     if (!primarySigPad.isEmpty()) {
         try {
             const sigData = primarySigPad.toDataURL();
-            doc.addImage(sigData, 'PNG', margin, yPos, 80, 30);
-            yPos += 35;
+            doc.addImage(sigData, 'PNG', margin, yPos, 70, 25);
+            yPos += 30;
         } catch (e) {
-            doc.text(primarySigName || 'Signature required', margin, yPos + 10);
-            yPos += 15;
+            doc.setFont(undefined, 'italic');
+            doc.setFontSize(9);
+            doc.text(primarySigName || 'Signature required', margin, yPos + 8);
+            yPos += 12;
         }
     } else if (primarySigName) {
         doc.setFont(undefined, 'italic');
-        doc.text(primarySigName, margin, yPos + 10);
-        yPos += 15;
+        doc.setFontSize(9);
+        doc.text(primarySigName, margin, yPos + 8);
+        yPos += 12;
     }
     
     doc.setFont(undefined, 'normal');
-    doc.text(`Date: ${getValue('primary_signature_date') || new Date().toLocaleDateString()}`, margin, yPos);
+    doc.setFontSize(8.5);
+    doc.text(`Date: ${formatDate(getValue('primary_signature_date')) || new Date().toLocaleDateString()}`, margin, yPos);
 
     // Co-Applicant Signature
     const coName = getValue('co_signature_name');
     if (coName || !coSigPad.isEmpty() || getValue('co_typed_signature')) {
-        checkPageBreak(50);
-        yPos += 10;
-        doc.setFontSize(11);
+        checkPageBreak(45);
+        yPos += 12;
+        doc.setDrawColor(200, 200, 200);
+        doc.line(margin, yPos, pageWidth - margin, yPos);
+        yPos += 8;
+        
+        doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
+        doc.setTextColor(44, 62, 80);
         doc.text("Co-Applicant", margin, yPos);
-        yPos += 7;
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'normal');
-        doc.text(`Full Name: ${coName}`, margin, yPos);
         yPos += 6;
+        doc.setFontSize(8.5);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+        doc.text(`Full Name: ${coName}`, margin, yPos);
+        yPos += 8;
         
         const coSigName = getValue('co_typed_signature');
         if (!coSigPad.isEmpty()) {
             try {
                 const sigData = coSigPad.toDataURL();
-                doc.addImage(sigData, 'PNG', margin, yPos, 80, 30);
-                yPos += 35;
+                doc.addImage(sigData, 'PNG', margin, yPos, 70, 25);
+                yPos += 30;
             } catch (e) {
-                doc.text(coSigName || 'Signature required', margin, yPos + 10);
-                yPos += 15;
+                doc.setFont(undefined, 'italic');
+                doc.setFontSize(9);
+                doc.text(coSigName || 'Signature required', margin, yPos + 8);
+                yPos += 12;
             }
         } else if (coSigName) {
             doc.setFont(undefined, 'italic');
-            doc.text(coSigName, margin, yPos + 10);
-            yPos += 15;
+            doc.setFontSize(9);
+            doc.text(coSigName, margin, yPos + 8);
+            yPos += 12;
         }
         
         doc.setFont(undefined, 'normal');
-        doc.text(`Date: ${getValue('co_signature_date') || new Date().toLocaleDateString()}`, margin, yPos);
+        doc.setFontSize(8.5);
+        doc.text(`Date: ${formatDate(getValue('co_signature_date')) || new Date().toLocaleDateString()}`, margin, yPos);
     }
+
+    // Add page numbers to all pages
+    addPageNumber();
 
     // Save PDF
     doc.save("Residential-Rental-Application.pdf");
